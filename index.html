@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>GROUPING PAYMENT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/fontawesome.min.css" />
+    <script src="js/vue.js"></script>
+    <script src="js/sweetalert.min.js"></script>
+    <script src="js/fontawesome.min.js"></script>
+
+
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="container-fluid">
+            <h3 class="text-center" style="margin-top:30px;font-weight: bolder">
+                {{title}}
+                <span><img v-bind:src="edit" width="15px" height="15px" v-on:click="editTitle"></span>
+            </h3>
+            <div class="row">
+                <div class="col-md-4 pos">
+                    <div class="card text-center bg-success mb-3 border-primary mb-3">
+
+                        <div class="card-header font-weight-bold">
+                            {{title}}
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title font-weight-bold">Krisko Asafo Mins</h5>
+
+                            <!-- <div class="card-text form-group">
+                                <input type="text" v-model="group_title" placeholder="Group Title" class="form-control" />
+                            </div> -->
+
+                            <div class="card-text form-group">
+                                <input type="text" v-model="group_name" placeholder="Group Name" class="form-control" />
+                            </div>
+
+                            <button class="btn btn-primary btn-lg" v-on:click="saveToStore">Save</button>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Table -->
+                <div class="col-md-8">
+                    <div class="pos">
+
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Groups</th>
+                                    <th scope="col">Amount Recieve</th>
+                                    <th scope="col">Delete</th>
+                                    <th scope="col"></th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(info,index) in store">
+                                    <td>{{index+1}}</td>
+                                    <td style="font-weight: bolder;font-size: 20px">{{info.name}}</td>
+                                    <td style="font-weight: bolder;font-size: 20px">GHC {{info.amount}}
+                                        <span  style="margin-left:9px"><img alt="add new amount" v-bind:src="plus" width="15px" height="15px" v-on:click="updateAmount(index)"></span>
+                                        <span><img alt="substract" v-bind:src="sub" width="15px" height="15px" v-on:click="updateSubAmount(index)" />
+                                        </span>
+                                    </td>
+                                    <td v-on:click="deleteData"><span>X</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pos" style="margin-bottom:30px;">
+                            <button class="btn btn-dark" v-on:click="showT =!showT">Total</button>
+                            <button class="btn btn-info" v-show="showT">GHC {{addTotal}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script type="">
+    var v1 = new Vue({
+        el:"#app",
+        data:{
+            store:[],
+            group_name:"",
+            title:"untitle",
+            amount:0,
+            total:0.0,
+            showT:false,
+            plus:"icons/plus.svg",
+            sub:"icons/minus-circle.svg",
+            edit:"icons/edit.svg",
+            database:window.localStorage,
+            editDb:window.localStorage,
+
+                    },
+        methods:{
+           
+            // Save object to localstorage
+            storage:function(data) {
+                let save = JSON.stringify(data);
+                let myStorage =this.database.setItem("fund",save)
+                        },
+            // get stored data from localstorage
+            getStorage:function(){
+                if (this.store.length<1){
+                    if(this.database.getItem("fund")){
+                        this.store=(JSON.parse(this.database.getItem("fund")));
+                    }
+                }
+            },
+            // Save store list
+            saveToStore:function() {
+                if(this.group_name!=""){
+                if(this.store.length<15){
+                this.userid+=1;
+                let dat = {name:this.group_name,amount:this.amount}
+                this.store.push(dat);
+                // return database
+                this.storage(this.store);
+                }else{
+                    swal({
+                    title: "Krisko Asafo",
+                    text: "Maximum Group is 15",
+                    icon: "error",
+                    button: "Okay!",
+                    });
+                }}else{
+                    swal({
+                    title: "Krisko Asafo",
+                    text: "Input is required",
+                    icon: "error",
+                    button: "Okay!",
+                    });
+                }
+            },
+            // delete
+            deleteData:function(id) {
+                this.store.splice(id,1);
+                this.storage(this.store);
+            },
+            // Edit Title
+            editTitle(){
+                swal("Title", {
+                content: "input",
+                })
+                .then((value) => {
+                    this.title = value;
+                    this.editDb.setItem('title',value);
+                });
+            },
+            getEdit(){
+                if(this.editDb.getItem('title')){
+                    this.title = this.editDb.getItem('title');
+                }
+                
+            }
+            ,
+            // update
+            updateAmount:function(id) {
+                let s = this.store[id]
+                swal(s.name +" update amount", {
+                content: "input",
+                })
+                .then((value) => {
+                    if(!isNaN(value)){
+                        if(value>0){
+                         let c= s.amount+=parseFloat(value);
+                         this.storage(this.store)}
+                     }else{
+                swal("AlpherNumeric Is not Allow !");
+                    }
+                });
+            },
+            // update
+            updateSubAmount:function(id) {
+                let s = this.store[id]
+                swal(s.name +" update amount", {
+                content: "input",
+                })
+                .then((value) => {
+                    if(!isNaN(value)){
+                        if(s.amount>0 && value>0){
+                         let c= s.amount-=parseFloat(value);
+                         this.storage(this.store)
+                        }
+                     }else{
+                swal("AlpherNumeric Is not Allow !");
+                    }
+                });
+            }
+            ,
+            updatePopUp:function(t){
+                swal({
+                    title: "Krisko Asafo",
+                    text: t,
+                    icon: "success",
+                    button: "Okay!",
+                    });
+            },
+
+        },
+        computed:{
+            addTotal:function(){
+                if (this.store.length>0){
+                    this.total =0.0;
+                    for(let i=0;i<this.store.length;i++){
+                        this.total+=parseFloat(this.store[i].amount);
+                    }
+                    console.log(this.total);
+                    return this.total;
+                }
+                
+            }
+            ,
+            objectExist:function(obj) {
+                    var count = 0;
+                    for (var property in obj) {
+                        if (Object.prototype.hasOwnProperty.call(obj, property)) {
+                            break;
+                            return true;
+                        }
+                    }
+                return false;
+                    }
+        }
+    });
+    // init
+    v1.getStorage();
+    v1.getEdit();
+   
+    </script>
+    <!-- Js -->
+    <script src="js/tests/vendor/jquery-1.9.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
